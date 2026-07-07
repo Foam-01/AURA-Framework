@@ -1,0 +1,7 @@
+﻿{
+  \"name\": \"@aura/backend\",
+  \"private\": true,
+  \"scripts\": {
+    \"dev\": \"echo 'Start backend dev server'\"
+  }
+}
