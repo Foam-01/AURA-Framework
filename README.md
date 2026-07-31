@@ -1,82 +1,80 @@
-# 🚀 AURA Framework
+# AURA Framework
 
-> **Production-Ready Fullstack Enterprise Architecture Framework**
-> *Clean Architecture • Domain-Driven Design (DDD) • Repository Pattern • Modular Monolith • Framework Agnostic*
+Production-Ready Fullstack Enterprise Architecture Framework based on Clean Architecture, Domain-Driven Design (DDD), Repository Pattern, and Modular Monolith principles.
 
-AURA Framework is an enterprise-grade monorepo architecture framework designed to build scalable, resilient, and maintainable software systems. It decouples core business logic from UI frameworks, backend engines, ORMs, and third-party libraries—ensuring your application's domain rules outlast framework lifecycles.
-
----
-
-## ✨ Key Features
-
-### ⚛️ Frontend
-- **React + Vite** (Active Default)
-- **Next.js Ready** (Seamless migration without altering Application or Domain layers)
-- **React Native Ready** (Share domain models and use-case logic directly with mobile apps)
-
-### 🛡️ Backend
-- **NestJS & Express/Fastify Support**
-- **Prisma / TypeORM / Drizzle ORM Agnostic Infrastructure**
-- **Modular Monolith** (Easily refactor modules into independent Microservices)
-
-### 🧱 Core Architecture
-- **Pure Domain Driven Design (DDD)**
-- **Strict Dependency Injection & Inversion**
-- **Repository Pattern Enforcement**
-- **Shared Pure Domain Package (`@aura/domain`)**
-- **Feature Isolation & Modular Boundaries**
+AURA Framework decouples core business logic from UI frameworks, backend engines, ORMs, and third-party libraries, ensuring that application domain rules remain independent of external infrastructure choices.
 
 ---
 
-## 💻 Supported Frontends
+## Features
+
+### Frontend
+- **React + Vite** as default presentation target
+- **Next.js Ready**: Migrate to SSR/SSG without modifying application or domain layers
+- **React Native Ready**: Share domain entities, contracts, and use cases directly with mobile targets
+
+### Backend
+- **NestJS** application module structure
+- **Framework & ORM Agnostic**: Infrastructure supports Prisma, TypeORM, or custom DB drivers
+- **Modular Monolith**: Clean module isolation ready for microservices extraction
+
+### Core Architecture
+- Pure Domain-Driven Design (DDD)
+- Explicit Dependency Inversion & Repository Pattern
+- Shared Pure Domain Package (`@aura/domain`)
+- Strict layer isolation and feature boundaries
+
+---
+
+## Supported Frontends
 
 | Platform | Status | Domain Reusability |
 | :--- | :--- | :--- |
-| **React + Vite** | ✔ Active | 100% Shared Business Rules |
-| **Next.js** | ✔ Supported | 100% Shared Business Rules |
-| **React Native** | ✔ Future Ready | 100% Shared Business Rules |
-| **Electron** | ✔ Future Ready | 100% Shared Business Rules |
+| **React + Vite** | Active | Shared Business Logic |
+| **Next.js** | Supported | Shared Business Logic |
+| **React Native** | Planned | Shared Business Logic |
+| **Electron** | Planned | Shared Business Logic |
 
 ---
 
-## ⚡ Supported Frameworks & Engines
+## Supported Frameworks & Engines
 
 | Layer | Current Engine | Supported Alternatives |
 | :--- | :--- | :--- |
 | **Frontend UI** | React + Vite | Next.js, React Native, Remix |
 | **Backend Engine** | NestJS | Fastify, Express, Bun, Deno |
 | **Database & ORM** | Prisma | PostgreSQL, SQL Server, MongoDB, TypeORM |
-| **HTTP / Transport** | Axios / Fetch API | GraphQL, gRPC, WebSockets |
+| **Transport** | REST / Fetch API | GraphQL, gRPC, WebSockets |
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```text
 aura-framework/
 │
 ├── apps/
 │   ├── frontend/             # Single-Page App or SSR Presentation Targets
-│   └── backend/              # Enterprise Backend Modular Monolith / Microservices
+│   └── backend/              # Modular Monolith / Microservices Backend
 │
 ├── packages/
-│   ├── domain/               # 💎 Pure Core Business Domain & Interfaces (Framework Agnostic)
+│   ├── domain/               # Pure Core Business Domain & Interfaces (Framework Agnostic)
 │   ├── shared-types/         # Global Type Definitions & Contracts
-│   ├── shared-ui/            # Cross-Platform Design System & Components
+│   ├── shared-ui/            # Cross-Platform Design System Components
 │   ├── shared-utils/         # Common Helper Functions & Utilities
-│   └── eslint-config/        # Monorepo Linting & Code Quality Standards
+│   └── eslint-config/        # Monorepo Code Quality & Lint Rules
 │
 ├── docker/                   # Containerization & Compose Configurations
-├── docs/                     # Architecture Specifications & ADRs
-├── scripts/                  # Setup & Build Scripts
+├── docs/                     # Architecture Documentation
+├── scripts/                  # Automation & Build Scripts
 └── package.json
 ```
 
 ---
 
-## 🏛️ Architecture Layers
+## Architecture Layers
 
-AURA Framework follows strict Clean Architecture & DDD layer boundaries:
+AURA Framework enforces strict Clean Architecture & DDD boundaries:
 
 ```text
        ┌────────────────────────────────────────┐
@@ -103,22 +101,22 @@ AURA Framework follows strict Clean Architecture & DDD layer boundaries:
 ```
 
 ### 1. Presentation Layer
-Receives HTTP requests or user UI actions. Delegates command processing to Application Use Cases. Has zero knowledge of SQL or database schemas.
+Handles HTTP routes, controllers, and UI components. Delegates processing to Application Use Cases without database logic.
 
 ### 2. Application Layer
-Contains application-specific business rules and orchestration logic (Use Cases, Input/Output DTOs). Interacts **only** with Repository Interfaces.
+Orchestrates application-specific workflow and business rules through Use Cases and DTOs. Interacts strictly through Repository interfaces.
 
 ### 3. Domain Layer
-The heart of the application. Contains domain entities, value objects, domain events, and core interfaces. Has **zero dependencies** on external libraries or frameworks.
+Contains core domain models, business entities, value objects, and repository contracts. Free from any framework dependencies.
 
 ### 4. Infrastructure Layer
-Implements domain & application interfaces (e.g. Prisma ORM repository implementations, Axios HTTP adapters, Redis cache). External frameworks live strictly here.
+Implements domain and application contracts using concrete technologies (Prisma ORM, HTTP clients, Redis cache, JWT adapters).
 
 ---
 
-## 🚫 Dependency Rule
+## Dependency Rules
 
-Dependencies always point **inward** toward the Domain layer.
+All code dependencies must point inward toward the Domain layer.
 
 ```text
 Presentation   ──────►   Application   ──────►   Domain
@@ -126,74 +124,83 @@ Presentation   ──────►   Application   ──────►   Dom
 Infrastructure ─────────────────────────────────────┘
 ```
 
-### Strict Restrictions
+### Allowed & Disallowed Imports
 
-> [!IMPORTANT]
-> **Business Logic (Domain & Application Layers) MUST NEVER import:**
-> 
-> ❌ `Prisma` / ORMs  
-> ❌ `Axios` / HTTP Clients  
-> ❌ `React` / `Next.js`  
-> ❌ `NestJS` / Server Frameworks  
+Domain and Application layers must not depend on external frameworks or infrastructure libraries:
+
+- Forbidden in Business Logic: `Prisma`, `Axios`, `React`, `Next.js`, `NestJS`
+- Allowed: Pure TypeScript, Domain Interfaces, Value Objects
+
+#### Example: Incorrect vs Correct Pattern
 
 ```typescript
-// ❌ WRONG: Importing Prisma inside UseCase
-import { prisma } from '@prisma/client'; // BREAKS CLEAN ARCHITECTURE
+// Incorrect: Directly importing Prisma inside UseCase
+import { prisma } from '@prisma/client';
 
-// ✅ CORRECT: Injecting Repository Interface inside UseCase
+export class RegisterUserUseCase {
+  async execute(input: RegisterUserDto) {
+    return prisma.user.create({ data: input });
+  }
+}
+```
+
+```typescript
+// Correct: Injecting Repository Interface inside UseCase
 import { UserRepository } from '@aura/domain';
 
 export class RegisterUserUseCase {
   constructor(private readonly userRepo: UserRepository) {}
+
+  async execute(input: RegisterUserDto) {
+    return this.userRepo.save(input);
+  }
 }
 ```
 
 ---
 
-## 📂 Example Domains Guide
+## Example Domains Guide
 
-To keep the starter framework intuitive for open-source contributors, sample domains are named with `example-` prefixes:
+Starter features use `example-` prefixes to indicate boilerplate sample domains:
 
 ```text
 domains/
-├── example-auth/           # Authentication & Token Use Cases
+├── example-auth/           # Authentication & Token Management
 ├── example-user/           # User Management Sample Domain
 └── example-product/        # Product Catalog Sample Domain
 ```
 
-### Replacing Example Domains with Business Domains
-When building your production enterprise system, replace `example-*` folders with your actual business capabilities:
+### Replacing Sample Domains
+Replace `example-*` modules with your specific business capabilities:
 
 ```text
 domains/
-├── hr/                     # Human Resources Domain
+├── hr/                     # Human Resources
 ├── crm/                    # Customer Relationship Management
 ├── erp/                    # Enterprise Resource Planning
-├── e-commerce/             # Online Store Domain
+├── e-commerce/             # E-Commerce Module
 ├── pos/                    # Point of Sale System
-├── hospital/               # Healthcare Domain
-└── school/                 # Education Domain
+├── hospital/               # Healthcare Operations
+└── school/                 # Academic Management
 ```
 
 ---
 
-## 🎯 Philosophy
+## Philosophy
 
-> **Frameworks are temporary. Business is permanent.**
+Frameworks are temporary. Business is permanent.
 
-*Frameworks change. Libraries change. Databases change. Business rules remain.*
+Frameworks, libraries, and databases inevitably change over time, but business rules remain constant. AURA Framework ensures that business logic stays decoupled from delivery mechanisms and persistent storage.
 
-AURA Framework is designed so that business logic is independent from UI frameworks, backend frameworks, databases, and external libraries.
+This structure allows seamless transitions:
+- UI evolution from React to Next.js or React Native
+- Architecture evolution from Modular Monolith to Microservices
+- Storage evolution from SQL Server to PostgreSQL or MongoDB
 
-This architecture empowers applications to evolve:
-- From **React** to **Next.js** or **React Native**
-- From **Modular Monolith** to **Microservices**
-- From **SQL Server** to **PostgreSQL** or **MongoDB**
-
-...without rewriting a single line of business rules.
+...all without rewriting underlying business logic.
 
 ---
 
-## 📜 License
+## License
 
-MIT License © AURA Framework
+MIT
