@@ -6,6 +6,19 @@ AURA Framework decouples core business logic from UI frameworks, backend engines
 
 ---
 
+## Principles
+
+- **Framework Agnostic**: Core business domain logic has zero dependencies on UI libraries or backend frameworks.
+- **Business First**: Code is organized around business domain capabilities rather than technical framework boundaries.
+- **Dependency Rule**: Code dependencies point strictly inward toward the pure Domain layer.
+- **Feature Isolation**: Each feature operates as an independent module with explicit barrel exports.
+- **Modular by Default**: Designed as a Modular Monolith, ready to be extracted into Microservices when scaling demands.
+- **Testability**: Use Cases and Domain Entities can be unit tested in isolation without mocking databases or HTTP servers.
+- **Scalable**: Supports multi-team development with clear architectural boundaries.
+- **Maintainable**: Single responsibility per class and strict architectural conventions.
+
+---
+
 ## Features
 
 ### Frontend
@@ -21,8 +34,24 @@ AURA Framework decouples core business logic from UI frameworks, backend engines
 ### Core Architecture
 - Pure Domain-Driven Design (DDD)
 - Explicit Dependency Inversion & Repository Pattern
-- Shared Pure Domain Package (`@aura/domain`)
+- Shared Pure Domain Package (`@aura/shared-domain`)
 - Strict layer isolation and feature boundaries
+
+---
+
+## Why Clean Architecture?
+
+| Architecture Pattern | Business Logic Isolation | Framework Independence | Scalability for Large Teams |
+| :--- | :--- | :--- | :--- |
+| **Traditional MVC** | Low (Coupled to Controllers & DB) | Low (Tightly bound to framework) | Low (Lead to God Controllers) |
+| **Layered (3-Tier)** | Medium (Business depends on DB) | Medium | Medium |
+| **Feature Folders Only** | Low (No layer enforcement) | Low | Medium |
+| **AURA Clean Architecture** | **High (100% Isolated Domain)** | **High (Framework Agnostic)** | **High (Enforced Boundaries)** |
+
+### Architecture Decisions
+- **Why not MVC?** MVC couples business rules to controllers and ORM models, leading to fat controllers that are difficult to unit test and maintain.
+- **Why not Layered Architecture?** Traditional 3-tier architecture places the Database at the bottom, forcing the business layer to depend directly on database schemas.
+- **Why Clean Architecture + DDD?** Clean Architecture inverts the database dependency, ensuring business logic depends only on abstractions (`IRepository`), making databases and delivery mechanisms interchangeable.
 
 ---
 
@@ -58,14 +87,14 @@ aura-framework/
 │   └── backend/              # Modular Monolith / Microservices Backend
 │
 ├── packages/
-│   ├── domain/               # Pure Core Business Domain & Interfaces (Framework Agnostic)
+│   ├── shared-domain/        # Pure Core Domain Abstractions & Contracts (Entity, ValueObject, IRepository)
 │   ├── shared-types/         # Global Type Definitions & Contracts
 │   ├── shared-ui/            # Cross-Platform Design System Components
 │   ├── shared-utils/         # Common Helper Functions & Utilities
 │   └── eslint-config/        # Monorepo Code Quality & Lint Rules
 │
 ├── docker/                   # Containerization & Compose Configurations
-├── docs/                     # Architecture Documentation
+├── docs/                     # Architecture Documentation (conventions.md, adr.md)
 ├── scripts/                  # Automation & Build Scripts
 └── package.json
 ```
@@ -131,58 +160,32 @@ Domain and Application layers must not depend on external frameworks or infrastr
 - Forbidden in Business Logic: `Prisma`, `Axios`, `React`, `Next.js`, `NestJS`
 - Allowed: Pure TypeScript, Domain Interfaces, Value Objects
 
-#### Example: Incorrect vs Correct Pattern
+---
 
-```typescript
-// Incorrect: Directly importing Prisma inside UseCase
-import { prisma } from '@prisma/client';
+## Sample Domains Guide
 
-export class RegisterUserUseCase {
-  async execute(input: RegisterUserDto) {
-    return prisma.user.create({ data: input });
-  }
-}
+Starter features use standard domain names as boilerplate references:
+
+```text
+domains/
+├── auth/                   # Authentication & Token Management
+├── user/                   # User Management Sample Domain
+└── product/                # Product Catalog Sample Domain
 ```
 
-```typescript
-// Correct: Injecting Repository Interface inside UseCase
-import { UserRepository } from '@aura/domain';
-
-export class RegisterUserUseCase {
-  constructor(private readonly userRepo: UserRepository) {}
-
-  async execute(input: RegisterUserDto) {
-    return this.userRepo.save(input);
-  }
-}
-```
+> **Note:** These are sample domains. Replace them with your own business domains (e.g., HR, CRM, ERP, E-Commerce, POS, Hospital, School).
 
 ---
 
-## Example Domains Guide
+## Coding Conventions
 
-Starter features use `example-` prefixes to indicate boilerplate sample domains:
+AURA Framework enforces strict naming and structural conventions across all modules:
 
-```text
-domains/
-├── example-auth/           # Authentication & Token Management
-├── example-user/           # User Management Sample Domain
-└── example-product/        # Product Catalog Sample Domain
-```
+- **Use Cases**: Must follow `[Verb][Entity]UseCase` (e.g., `LoginUserUseCase`, `CreateOrderUseCase`).
+- **Repositories**: Interfaces follow `I[Entity]Repository` (`IUserRepository`), implementations follow `[Tech][Entity]Repository` (`PrismaUserRepository`).
+- **Controllers & Presenters**: Follow `[Entity]Controller` and `[Entity]Presenter`.
 
-### Replacing Sample Domains
-Replace `example-*` modules with your specific business capabilities:
-
-```text
-domains/
-├── hr/                     # Human Resources
-├── crm/                    # Customer Relationship Management
-├── erp/                    # Enterprise Resource Planning
-├── e-commerce/             # E-Commerce Module
-├── pos/                    # Point of Sale System
-├── hospital/               # Healthcare Operations
-└── school/                 # Academic Management
-```
+For complete architectural conventions and detailed guidelines, see [docs/conventions.md](file:///c:/Users/GIGABYTE/Desktop/AURA-Framework/docs/conventions.md) and [docs/adr.md](file:///c:/Users/GIGABYTE/Desktop/AURA-Framework/docs/adr.md).
 
 ---
 
@@ -191,13 +194,6 @@ domains/
 Frameworks are temporary. Business is permanent.
 
 Frameworks, libraries, and databases inevitably change over time, but business rules remain constant. AURA Framework ensures that business logic stays decoupled from delivery mechanisms and persistent storage.
-
-This structure allows seamless transitions:
-- UI evolution from React to Next.js or React Native
-- Architecture evolution from Modular Monolith to Microservices
-- Storage evolution from SQL Server to PostgreSQL or MongoDB
-
-...all without rewriting underlying business logic.
 
 ---
 
