@@ -1,5 +1,11 @@
-﻿{
-  \"name\": \"aura-template\",
-  \"private\": true,
-  \"workspaces\": [\"apps/*\", \"packages/*\"]
+{
+  "name": "aura-framework",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "aura:create-domain": "node scripts/create-domain.js"
+  }
 }

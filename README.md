@@ -35,7 +35,90 @@ AURA Framework decouples core business logic from UI frameworks, backend engines
 - Pure Domain-Driven Design (DDD)
 - Explicit Dependency Inversion & Repository Pattern
 - Shared Pure Domain Package (`@aura/shared-domain`)
-- Strict layer isolation and feature boundaries
+- Automated CLI Domain Generator (`npm run aura:create-domain`)
+
+---
+
+## Visual Request Flow & Dependency Rules
+
+### Frontend Request Execution Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant UI as Presentation (React Page / Component)
+    participant Hook as Presentation (Custom Hook)
+    participant UC as Application (Use Case)
+    participant RepoIF as Application (Repository Interface)
+    participant RepoImpl as Infrastructure (Axios / Fetch Adapter)
+    participant API as Backend API
+
+    User->>UI: Interacts (e.g. Clicks Login)
+    UI->>Hook: Triggers Handler
+    Hook->>UC: Calls execute(InputDTO)
+    UC->>RepoIF: Invokes Repository Interface
+    RepoIF->>RepoImpl: Executes Concrete Implementation
+    RepoImpl->>API: Sends HTTP Request
+    API-->>RepoImpl: Returns HTTP Response
+    RepoImpl-->>UC: Maps & Returns Output DTO
+    UC-->>Hook: Resolves Response
+    Hook-->>UI: Updates UI State
+```
+
+### Backend Request Execution Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client
+    participant Controller as Presentation (NestJS Controller)
+    participant UC as Application (Use Case)
+    participant RepoIF as Application (Repository Interface)
+    participant RepoImpl as Infrastructure (Prisma Repository)
+    participant DB as Database
+
+    Client->>Controller: Sends HTTP POST Request
+    Controller->>UC: Delegates to Use Case
+    UC->>RepoIF: Calls Repository Method
+    RepoIF->>RepoImpl: Executes Database Query
+    RepoImpl->>DB: Executes SQL / ORM Operation
+    DB-->>RepoImpl: Returns Raw Data
+    RepoImpl-->>UC: Maps to Domain Entity
+    UC-->>Controller: Returns Output DTO
+    Controller-->>Client: Responds with HTTP 200/201 JSON
+```
+
+---
+
+## Quick Start: CLI Domain Generator
+
+Scaffold a complete, 4-layered Clean Architecture domain feature across Frontend and Backend in a single command:
+
+```bash
+npm run aura:create-domain <domain-name>
+```
+
+### Example
+
+```bash
+npm run aura:create-domain order
+```
+
+**Generates:**
+```text
+apps/frontend/src/domains/order/
+├── domain/ (entities, value-objects, services)
+├── application/ (use-cases, dto, presenters)
+├── infrastructure/ (api, repositories, cache)
+├── presentation/ (components, hooks, pages)
+└── index.ts
+
+apps/backend/src/domains/order/
+├── domain/, application/, infrastructure/, presentation/
+├── order.module.ts
+└── index.ts
+```
 
 ---
 
@@ -55,29 +138,7 @@ AURA Framework decouples core business logic from UI frameworks, backend engines
 
 ---
 
-## Supported Frontends
-
-| Platform | Status | Domain Reusability |
-| :--- | :--- | :--- |
-| **React + Vite** | Active | Shared Business Logic |
-| **Next.js** | Supported | Shared Business Logic |
-| **React Native** | Planned | Shared Business Logic |
-| **Electron** | Planned | Shared Business Logic |
-
----
-
-## Supported Frameworks & Engines
-
-| Layer | Current Engine | Supported Alternatives |
-| :--- | :--- | :--- |
-| **Frontend UI** | React + Vite | Next.js, React Native, Remix |
-| **Backend Engine** | NestJS | Fastify, Express, Bun, Deno |
-| **Database & ORM** | Prisma | PostgreSQL, SQL Server, MongoDB, TypeORM |
-| **Transport** | REST / Fetch API | GraphQL, gRPC, WebSockets |
-
----
-
-## Repository Structure
+## Repository Structure & Documentation
 
 ```text
 aura-framework/
@@ -93,72 +154,26 @@ aura-framework/
 │   ├── shared-utils/         # Common Helper Functions & Utilities
 │   └── eslint-config/        # Monorepo Code Quality & Lint Rules
 │
-├── docker/                   # Containerization & Compose Configurations
-├── docs/                     # Architecture Documentation (conventions.md, adr.md)
-├── scripts/                  # Automation & Build Scripts
+├── docs/                     # Architecture Documentation
+│   ├── project-structure.md  # 5-Minute Monorepo & Layer Responsibility Guide
+│   ├── conventions.md        # Naming & Coding Conventions
+│   ├── adr.md                # Architecture Decision Records
+│   └── roadmap.md            # Release & Feature Evolution Roadmap
+│
+├── scripts/                  # Automation Scripts (create-domain.js)
 └── package.json
 ```
 
 ---
 
-## Architecture Layers
+## Documentation Links
 
-AURA Framework enforces strict Clean Architecture & DDD boundaries:
-
-```text
-       ┌────────────────────────────────────────┐
-       │           Presentation Layer           │
-       │     (React, Next.js, Controllers)      │
-       └───────────────────┬────────────────────┘
-                           │ (depends on)
-                           ▼
-       ┌────────────────────────────────────────┐
-       │           Application Layer            │
-       │         (Use Cases, DTOs)              │
-       └───────────────────┬────────────────────┘
-                           │ (depends on)
-                           ▼
-       ┌────────────────────────────────────────┐
-       │             Domain Layer               │
-       │     (Entities, Value Objects)          │
-       └───────────────────▲────────────────────┘
-                           │ (implements interfaces)
-       ┌───────────────────┴────────────────────┐
-       │          Infrastructure Layer          │
-       │    (Prisma, Axios, Redis, Jwt, DB)     │
-       └────────────────────────────────────────┘
-```
-
-### 1. Presentation Layer
-Handles HTTP routes, controllers, and UI components. Delegates processing to Application Use Cases without database logic.
-
-### 2. Application Layer
-Orchestrates application-specific workflow and business rules through Use Cases and DTOs. Interacts strictly through Repository interfaces.
-
-### 3. Domain Layer
-Contains core domain models, business entities, value objects, and repository contracts. Free from any framework dependencies.
-
-### 4. Infrastructure Layer
-Implements domain and application contracts using concrete technologies (Prisma ORM, HTTP clients, Redis cache, JWT adapters).
-
----
-
-## Dependency Rules
-
-All code dependencies must point inward toward the Domain layer.
-
-```text
-Presentation   ──────►   Application   ──────►   Domain
-                                                    ▲
-Infrastructure ─────────────────────────────────────┘
-```
-
-### Allowed & Disallowed Imports
-
-Domain and Application layers must not depend on external frameworks or infrastructure libraries:
-
-- Forbidden in Business Logic: `Prisma`, `Axios`, `React`, `Next.js`, `NestJS`
-- Allowed: Pure TypeScript, Domain Interfaces, Value Objects
+- [Project Structure & Layer Guide](docs/project-structure.md)
+- [Coding Conventions](docs/conventions.md)
+- [Architecture Decision Records (ADR)](docs/adr.md)
+- [Framework Roadmap](docs/roadmap.md)
+- [Contribution Guidelines](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
 
 ---
 
@@ -177,18 +192,6 @@ domains/
 
 ---
 
-## Coding Conventions
-
-AURA Framework enforces strict naming and structural conventions across all modules:
-
-- **Use Cases**: Must follow `[Verb][Entity]UseCase` (e.g., `LoginUserUseCase`, `CreateOrderUseCase`).
-- **Repositories**: Interfaces follow `I[Entity]Repository` (`IUserRepository`), implementations follow `[Tech][Entity]Repository` (`PrismaUserRepository`).
-- **Controllers & Presenters**: Follow `[Entity]Controller` and `[Entity]Presenter`.
-
-For complete architectural conventions and detailed guidelines, see [docs/conventions.md](file:///c:/Users/GIGABYTE/Desktop/AURA-Framework/docs/conventions.md) and [docs/adr.md](file:///c:/Users/GIGABYTE/Desktop/AURA-Framework/docs/adr.md).
-
----
-
 ## Philosophy
 
 Frameworks are temporary. Business is permanent.
@@ -199,4 +202,4 @@ Frameworks, libraries, and databases inevitably change over time, but business r
 
 ## License
 
-MIT
+MIT © AURA Framework
